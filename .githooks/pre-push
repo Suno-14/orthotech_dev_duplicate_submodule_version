@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+set -e
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+BUILD_DIR="$REPO_ROOT/.build_hook"
+
+echo ""
+echo "Running pre-push checks..."
+
+#
+# Verify CMake exists
+#
+if ! command -v cmake >/dev/null 2>&1; then
+    echo "WARNING: CMake not installed."
+    exit 1
+
+fi
+#
+# Configure build
+#
+mkdir -p "$BUILD_DIR"
+cd "$BUILD_DIR"
+
+echo ""
+echo "Configuring project..."
+
+if ! cmake .. -DCMAKE_BUILD_TYPE=Debug; then
+    echo ""
+    echo "ERROR: CMake configuration failed."
+    exit 1
+fi
+
+echo ""
+echo "Building project..."
+
+if ! cmake --build . --parallel; then
+    echo ""
+    echo "ERROR: Build failed."
+    exit 1
+fi
+
+echo ""
+echo "Build successful."
+exit 0
