@@ -14,5 +14,4 @@ src/calculations.cpp)
 
 target_link_libraries(main
     Eigen3::Eigen
-    ur_rtde::rtde
 )
