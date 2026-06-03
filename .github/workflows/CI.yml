@@ -46,15 +46,43 @@ jobs:
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Install CMake (Windows)
+      - name: Install CMake
         if: runner.os == 'Windows'
         uses: lukka/get-cmake@latest
 
-      - name: Configure Project
+      - name: Install vcpkg
+        if: runner.os == 'Windows'
+        uses: lukka/run-vcpkg@v11
+
+      - name: Install Eigen
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          vcpkg install eigen3:x64-windows
+
+      - name: Configure Project (Linux)
+        if: runner.os == 'Linux'
         run: cmake -S . -B build
+
+      - name: Configure Project (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cmake -S . -B build `
+            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
 
       - name: Build Project
         run: cmake --build build --config Release
+
+      - name: List Build Files (Linux)
+        if: runner.os == 'Linux'
+        run: find build -type f
+
+      - name: List Build Files (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Get-ChildItem -Recurse build
 
       - name: Run Executable (Linux)
         if: runner.os == 'Linux'
@@ -62,4 +90,6 @@ jobs:
 
       - name: Run Executable (Windows)
         if: runner.os == 'Windows'
-        run: .\build\Release\main.exe
+        shell: pwsh
+        run: |
+          .\build\Release\main.exe
