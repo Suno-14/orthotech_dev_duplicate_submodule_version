@@ -65,14 +65,29 @@ jobs:
             -OutFile eigen.zip
           Expand-Archive eigen.zip -DestinationPath C:\eigen
           Write-Host "Eigen extracted to C:\eigen\eigen-3.4.0"
+          
+      - name: Debug Eigen extraction
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Write-Host "=== Contents of C:\eigen ==="
+          Get-ChildItem -Recurse C:\eigen | Select-Object FullName
 
       - name: Configure Project (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           cmake -S . -B build `
-            -DEigen3_DIR="C:/eigen/eigen-3.4.0" `
+            -DEigen3_DIR="C:/eigen/eigen-3.4.0/cmake" `
             -DVCPKG_MANIFEST_MODE=OFF
+      
+      # - name: Configure Project (Windows)
+      #   if: runner.os == 'Windows'
+      #   shell: pwsh
+      #   run: |
+      #     cmake -S . -B build `
+      #       -DEigen3_DIR="C:/eigen/eigen-3.4.0" `
+      #       -DVCPKG_MANIFEST_MODE=OFF
 
       # -----------------------------------------------
       # Both OS
