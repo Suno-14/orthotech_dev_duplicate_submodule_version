@@ -1,22 +1,107 @@
-name: C++ CI
+# name: C++ CI
 
+# on:
+#   push:
+#   pull_request:
+
+# jobs:
+#   build:
+
+#     strategy:
+#       matrix:
+#         os:
+#           - ubuntu-latest
+#           - windows-latest
+
+#     runs-on: ${{ matrix.os }}
+
+#     steps:
+
+#       - name: Checkout Repository
+#         uses: actions/checkout@v4
+
+#       - name: Setup Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: "3.11"
+
+#       - name: Install PyYAML
+#         run: pip install pyyaml
+
+#       - name: Generate Requirements
+#         run: python scripts/generate_requirements.py
+
+#       - name: Install Linux Dependencies
+#         if: runner.os == 'Linux'
+#         run: |
+#           sudo apt-get update
+#           sudo apt-get install -y \
+#             build-essential \
+#             g++ \
+#             make \
+#             cmake \
+#             libeigen3-dev
+
+#       - name: Setup MSVC
+#         if: runner.os == 'Windows'
+#         uses: ilammy/msvc-dev-cmd@v1
+
+#       - name: Install CMake
+#         if: runner.os == 'Windows'
+#         uses: lukka/get-cmake@latest
+
+#       - name: Install Eigen (Windows)      
+#         if: runner.os == 'Windows'
+#         shell: pwsh
+#         run: |
+#           C:\vcpkg\vcpkg install eigen3:x64-windows
+#           C:\vcpkg\vcpkg integrate install
+
+#       - name: Configure Project (Windows)
+#         if: runner.os == 'Windows'
+#         shell: pwsh
+#         run: |
+#           cmake -S . -B build `
+#             -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+
+#       - name: Build Project
+#         run: cmake --build build --config Release
+
+#       - name: List Build Files (Linux)
+#         if: runner.os == 'Linux'
+#         run: find build -type f
+
+#       - name: List Build Files (Windows)
+#         if: runner.os == 'Windows'
+#         shell: pwsh
+#         run: |
+#           Get-ChildItem -Recurse build
+
+#       - name: Run Executable (Linux)
+#         if: runner.os == 'Linux'
+#         run: ./build/main
+
+#       - name: Run Executable (Windows)
+#         if: runner.os == 'Windows'
+#         shell: pwsh
+#         run: |
+#           .\build\Release\main.exe
+
+name: C++ CI
 on:
   push:
   pull_request:
 
 jobs:
   build:
-
     strategy:
       matrix:
         os:
           - ubuntu-latest
           - windows-latest
-
     runs-on: ${{ matrix.os }}
 
     steps:
-
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -31,6 +116,9 @@ jobs:
       - name: Generate Requirements
         run: python scripts/generate_requirements.py
 
+      # -----------------------------------------------
+      # Linux
+      # -----------------------------------------------
       - name: Install Linux Dependencies
         if: runner.os == 'Linux'
         run: |
@@ -42,6 +130,13 @@ jobs:
             cmake \
             libeigen3-dev
 
+      - name: Configure Project (Linux)        # ← THIS WAS MISSING
+        if: runner.os == 'Linux'
+        run: cmake -S . -B build
+
+      # -----------------------------------------------
+      # Windows
+      # -----------------------------------------------
       - name: Setup MSVC
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
@@ -50,7 +145,7 @@ jobs:
         if: runner.os == 'Windows'
         uses: lukka/get-cmake@latest
 
-      - name: Install Eigen (Windows)      
+      - name: Install Eigen (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
@@ -74,8 +169,7 @@ jobs:
       - name: List Build Files (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
-        run: |
-          Get-ChildItem -Recurse build
+        run: Get-ChildItem -Recurse build
 
       - name: Run Executable (Linux)
         if: runner.os == 'Linux'
@@ -84,5 +178,4 @@ jobs:
       - name: Run Executable (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
-        run: |
-          .\build\Release\main.exe
+        run: .\build\Release\main.exe
