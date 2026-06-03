@@ -1,0 +1,30 @@
+project:
+  name: orthotech_dev_duplicate
+  cpp_standard: 17
+
+dependencies:
+  common:
+    packages:
+      - cmake
+
+  linux:
+    packages:
+      - build-essential
+      - g++
+      - make
+      - libeigen3-dev
+
+    source:
+      - ur_rtde
+
+  windows:
+    packages:
+      - cmake
+
+    vcpkg:
+      - eigen3
+      - ur-rtde
+
+outputs:
+  linux: linux-requirements.txt
+  windows: windows-requirements.txt
