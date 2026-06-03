@@ -68,12 +68,13 @@ jobs:
           C:\vcpkg\vcpkg install eigen3:x64-windows
           C:\vcpkg\vcpkg integrate install
 
-      - name: Configure Project (Windows)   
+      - name: Configure Project (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           cmake -S . -B build `
             -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" `
+            -DCMAKE_PREFIX_PATH="C:/vcpkg/installed/x64-windows" `
             -DVCPKG_MANIFEST_MODE=OFF
 
 
