@@ -63,11 +63,11 @@ jobs:
           # extract
           Expand-Archive eigen.zip -DestinationPath C:\eigen
 
-          # build and install (this generates Eigen3Config.cmake)
+          # build and install 
           cmake -S C:\eigen\eigen-3.4.0 -B C:\eigen\build
           cmake --install C:\eigen\build --prefix C:\eigen\install
 
-          # verify Eigen3Config.cmake was generated
+          # verify Eigen3Config.cmake
           Write-Host "=== Verifying Eigen3Config.cmake ==="
           Get-ChildItem -Recurse "C:\eigen\install" -Filter "Eigen3Config.cmake"
 
