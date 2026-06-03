@@ -39,8 +39,7 @@ jobs:
             build-essential \
             g++ \
             make \
-            cmake \
-            libeigen3-dev
+            cmake 
 
       - name: Setup MSVC
         if: runner.os == 'Windows'
