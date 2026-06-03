@@ -67,7 +67,20 @@ jobs:
         run: |
           C:\vcpkg\vcpkg install eigen3:x64-windows
           C:\vcpkg\vcpkg integrate install
+          
+      - name: Find Eigen3 location (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Write-Host "=== vcpkg installed packages ==="
+          C:\vcpkg\vcpkg list
 
+          Write-Host "=== searching for Eigen3Config.cmake ==="
+          Get-ChildItem -Recurse -Path "C:\vcpkg" -Filter "Eigen3Config.cmake" -ErrorAction SilentlyContinue
+
+          Write-Host "=== searching in installed folder ==="
+          Get-ChildItem "C:\vcpkg\installed\" -ErrorAction SilentlyContinue
+     
       - name: Configure Project (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
