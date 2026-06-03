@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+set -e
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+
+echo "[1/3] Checking project structure..."
+
+required_paths=(
+    "CMakeLists.txt"
+    "src"
+    "include"
+)
+
+for path in "${required_paths[@]}"; do
+    if [ ! -e "$REPO_ROOT/$path" ]; then
+        echo "ERROR: Missing $path"
+        exit 1
+    fi
+done
+
+echo "Structure check passed."
+
+echo "[2/3] Checking staged files..."
+
+if git diff --cached --check; then
+    echo "Whitespace check passed."
+else
+    echo "ERROR: Trailing whitespace detected."
+    exit 1
+fi
+
+echo "[3/3] Checking for build artifacts..."
+
+staged_files=$(git diff --cached --name-only)
+
+for file in $staged_files; do
+    case "$file" in
+        *.exe|*.dll|*.obj|*.o)
+            echo "ERROR: Build artifact detected: $file"
+            exit 1
+            ;;
+    esac
+done
+
+echo "All checks passed."
+exit 0

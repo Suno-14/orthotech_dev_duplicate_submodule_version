@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+set -e
+
+echo ""
+echo "Running pre-push checks..."
+
+#
+# Check CMake
+#
+if ! command -v cmake >/dev/null 2>&1; then
+    echo ""
+    echo "ERROR: CMake is not installed or not available in PATH."
+    echo "Please install CMake before pushing."
+    echo "Push blocked."
+    exit 1
+fi
+
+echo "CMake found:"
+cmake --version | head -n 1
+
+echo ""
+echo "Pre-push checks passed."
+
+exit 0
