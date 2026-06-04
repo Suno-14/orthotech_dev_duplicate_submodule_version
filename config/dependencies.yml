@@ -13,14 +13,10 @@ dependencies:
       - g++
       - make
       - libeigen3-dev
-
     source:
       - ur_rtde
 
   windows:
-    packages:
-      - cmake
-
     vcpkg:
       - eigen3
       - ur-rtde

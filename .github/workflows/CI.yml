@@ -38,10 +38,24 @@ jobs:
             cmake \
             libeigen3-dev
 
+<<<<<<< HEAD
       - name: Configure Project (Linux)
         if: runner.os == 'Linux'
         run: cmake -S . -B build
 
+=======
+      - name: Build and Install ur_rtde from Source (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          git clone https://gitlab.com/sdurobotics/ur_rtde.git
+          cd ur_rtde
+          git submodule update --init --recursive
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make -j$(nproc)
+          sudo make install
+          sudo ldconfig
+>>>>>>> 6fe8166 (Added ur_rtde for windows and linux)
 
       - name: Setup MSVC
         if: runner.os == 'Windows'
@@ -51,6 +65,7 @@ jobs:
         if: runner.os == 'Windows'
         uses: lukka/get-cmake@latest
 
+<<<<<<< HEAD
       - name: Download and Install Eigen (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
@@ -79,6 +94,22 @@ jobs:
             -DCMAKE_PREFIX_PATH="C:/eigen/install" `
             -DVCPKG_MANIFEST_MODE=OFF
 
+=======
+      - name: Setup vcpkg and Install Windows Dependencies
+        if: runner.os == 'Windows'
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          .\vcpkg\bootstrap-vcpkg.bat
+          .\vcpkg\vcpkg install eigen3:x64-windows ur-rtde:x64-windows
+
+      - name: Configure Project (Linux)
+        if: runner.os == 'Linux'
+        run: cmake -S . -B build
+>>>>>>> 6fe8166 (Added ur_rtde for windows and linux)
+
+      - name: Configure Project (Windows)
+        if: runner.os == 'Windows'
+        run: cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=.\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows
 
       - name: Build Project
         run: cmake --build build --config Release
@@ -98,5 +129,9 @@ jobs:
 
       - name: Run Executable (Windows)
         if: runner.os == 'Windows'
+<<<<<<< HEAD
         shell: pwsh
         run: .\build\Release\main.exe
+=======
+        run: .\build\Release\arith.exe
+>>>>>>> 6fe8166 (Added ur_rtde for windows and linux)
