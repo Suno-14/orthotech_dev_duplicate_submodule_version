@@ -27,7 +27,7 @@ jobs:
       - name: Generate Requirements
         run: python scripts/generate_requirements.py
 
-      #  LINUX
+      # LINUX
 
       - name: Install Linux Dependencies
         if: runner.os == 'Linux'
@@ -57,7 +57,7 @@ jobs:
         if: runner.os == 'Linux'
         run: cmake -S . -B build
 
-      #  WINDOWS 
+      # WINDOWS
 
       - name: Setup MSVC
         if: runner.os == 'Windows'
@@ -67,6 +67,16 @@ jobs:
         if: runner.os == 'Windows'
         uses: lukka/get-cmake@latest
 
+      - name: Install Boost prebuilt (Windows)
+        if: runner.os == 'Windows'
+        uses: MarkusJx/install-boost@v2.4.5
+        id: install-boost
+        with:
+          boost_version: 1.83.0
+          platform_version: 2022
+          toolset: msvc
+          arch: x86
+
       - name: Setup vcpkg (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
@@ -75,15 +85,37 @@ jobs:
           cd vcpkg
           .\bootstrap-vcpkg.bat -disableMetrics
 
-      - name: Install Boost and Eigen via vcpkg (Windows)
+      - name: Cache vcpkg Eigen (Windows)
         if: runner.os == 'Windows'
+        uses: actions/cache@v4
+        id: cache-eigen
+        with:
+          path: vcpkg/installed
+          key: vcpkg-eigen3-x64-windows-${{ hashFiles('config/dependencies.yml') }}
+          restore-keys: |
+            vcpkg-eigen3-x64-windows-
+
+      - name: Install Eigen via vcpkg (Windows)
+        if: runner.os == 'Windows' && steps.cache-eigen.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-          .\vcpkg\vcpkg.exe install boost:x64-windows eigen3:x64-windows
+          .\vcpkg\vcpkg.exe install eigen3:x64-windows
+
+      - name: Cache ur_rtde install (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/cache@v4
+        id: cache-ur-rtde
+        with:
+          path: C:\ur_rtde_install
+          key: ur-rtde-x64-windows-${{ hashFiles('config/dependencies.yml') }}
+          restore-keys: |
+            ur-rtde-x64-windows-
 
       - name: Build and Install ur_rtde from Source (Windows)
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && steps.cache-ur-rtde.outputs.cache-hit != 'true'
         shell: pwsh
+        env:
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         run: |
           git clone https://gitlab.com/sdurobotics/ur_rtde.git
           cd ur_rtde
@@ -93,8 +125,8 @@ jobs:
           cmake .. `
             -DCMAKE_BUILD_TYPE=Release `
             -DPYTHON_BINDINGS:BOOL=OFF `
-            -DBOOST_ROOT="D:\a\orthotech_dev_duplicate\orthotech_dev_duplicate\vcpkg\installed\x64-windows" `
-            -DCMAKE_TOOLCHAIN_FILE="D:\a\orthotech_dev_duplicate\orthotech_dev_duplicate\vcpkg\scripts\buildsystems\vcpkg.cmake" `
+            -DBOOST_ROOT="$env:BOOST_ROOT" `
+            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake" `
             -DVCPKG_TARGET_TRIPLET=x64-windows `
             -DCMAKE_INSTALL_PREFIX="C:\ur_rtde_install"
           cmake --build . --config Release
@@ -103,13 +135,16 @@ jobs:
       - name: Configure Project (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
+        env:
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         run: |
           cmake -S . -B build `
-            -DCMAKE_TOOLCHAIN_FILE="D:\a\orthotech_dev_duplicate\orthotech_dev_duplicate\vcpkg\scripts\buildsystems\vcpkg.cmake" `
+            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake" `
             -DVCPKG_TARGET_TRIPLET=x64-windows `
-            -DCMAKE_PREFIX_PATH="C:\ur_rtde_install"
+            -DCMAKE_PREFIX_PATH="C:\ur_rtde_install" `
+            -DBOOST_ROOT="$env:BOOST_ROOT"
 
-      # BUILD & RUN 
+      # BUILD & RUN
 
       - name: Build Project
         run: cmake --build build --config Release
