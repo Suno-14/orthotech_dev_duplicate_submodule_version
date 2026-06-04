@@ -36,7 +36,8 @@ jobs:
             g++ \
             make \
             cmake \
-            libeigen3-dev
+            libeigen3-dev \
+            libboost-all-dev
 
       - name: Build and Install ur_rtde from Source (Linux)
         if: runner.os == 'Linux'
