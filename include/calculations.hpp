@@ -2,6 +2,7 @@
 #define CALCULATIONS_HPP
 
 #include <Eigen/Eigenvalues>
+#include <string>
 #include <ur_rtde/rtde_receive_interface.h>
 
 using namespace Eigen;

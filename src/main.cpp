@@ -1,5 +1,6 @@
 #include <iostream>
 #include <calculations.hpp>
+#include <string>
 
 int main()
 {
