@@ -5,6 +5,7 @@
 #include <string>
 #include <ur_rtde/rtde_receive_interface.h>
 
+using namespace std;
 using namespace Eigen;
 class Calculations
 {
