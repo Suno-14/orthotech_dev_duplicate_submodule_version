@@ -19,7 +19,7 @@ dependencies:
   windows:
     vcpkg:
       - eigen3
-      - ur-rtde
+      - boost
 
 outputs:
   linux: linux-requirements.txt
