@@ -66,24 +66,6 @@ jobs:
       - name: Install CMake (Windows)
         if: runner.os == 'Windows'
         uses: lukka/get-cmake@latest
-      
-      - name: Install Boost via Chocolatey (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          choco install boost-msvc-14.3 -y
-          $boostDir = Get-ChildItem "C:\local\" -Filter "boost*" | Select-Object -First 1
-          $boostRoot = "C:\local\$($boostDir.Name)"
-          echo "BOOST_ROOT=$boostRoot" >> $env:GITHUB_ENV
-          echo "BOOST_INCLUDEDIR=$boostRoot" >> $env:GITHUB_ENV
-          echo "BOOST_LIBRARYDIR=$boostRoot\lib64-msvc-14.3" >> $env:GITHUB_ENV
-          echo "Boost found at: $boostRoot"
-      # - name: Install Boost via Chocolatey (Windows)
-      #   if: runner.os == 'Windows'
-      #   shell: pwsh
-      #   run: |
-      #     choco install boost-msvc-14.3 --version=1.83.0 -y
-      #     echo "BOOST_ROOT=C:\local\boost_1_83_0" >> $env:GITHUB_ENV
 
       - name: Setup vcpkg (Windows)
         if: runner.os == 'Windows'
@@ -93,21 +75,21 @@ jobs:
           cd vcpkg
           .\bootstrap-vcpkg.bat -disableMetrics
 
-      - name: Cache vcpkg Eigen (Windows)
+      - name: Cache vcpkg packages (Windows)
         if: runner.os == 'Windows'
         uses: actions/cache@v4
         id: cache-eigen
         with:
           path: vcpkg/installed
-          key: vcpkg-eigen3-x64-windows-${{ hashFiles('config/dependencies.yml') }}
+          key: vcpkg-eigen3-boost-x64-windows-${{ hashFiles('config/dependencies.yml') }}
           restore-keys: |
-            vcpkg-eigen3-x64-windows-
+            vcpkg-eigen3-boost-x64-windows-
 
-      - name: Install Eigen via vcpkg (Windows)
+      - name: Install Eigen and Boost via vcpkg (Windows)
         if: runner.os == 'Windows' && steps.cache-eigen.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-          .\vcpkg\vcpkg.exe install eigen3:x64-windows
+          .\vcpkg\vcpkg.exe install eigen3:x64-windows boost:x64-windows
 
       - name: Cache ur_rtde install (Windows)
         if: runner.os == 'Windows'
@@ -131,10 +113,6 @@ jobs:
           cmake .. `
             -DCMAKE_BUILD_TYPE=Release `
             -DPYTHON_BINDINGS:BOOL=OFF `
-            -DBOOST_ROOT="$env:BOOST_ROOT" `
-            -DBOOST_INCLUDEDIR="$env:BOOST_ROOT" `
-            -DBOOST_LIBRARYDIR="$env:BOOST_ROOT\lib64-msvc-14.3" `
-            -DBoost_NO_BOOST_CMAKE=ON `
             -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake" `
             -DVCPKG_TARGET_TRIPLET=x64-windows `
             -DCMAKE_INSTALL_PREFIX="C:\ur_rtde_install"
@@ -147,4 +125,28 @@ jobs:
         run: |
           cmake -S . -B build `
             -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake" `
-            -D
+            -DVCPKG_TARGET_TRIPLET=x64-windows `
+            -DCMAKE_PREFIX_PATH="C:\ur_rtde_install"
+
+      # BUILD & RUN
+
+      - name: Build Project
+        run: cmake --build build --config Release
+
+      - name: List Build Files (Linux)
+        if: runner.os == 'Linux'
+        run: find build -type f
+
+      - name: List Build Files (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Get-ChildItem -Recurse build
+
+      - name: Run Executable (Linux)
+        if: runner.os == 'Linux'
+        run: ./build/main
+
+      - name: Run Executable (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: .\build\Release\main.exe
