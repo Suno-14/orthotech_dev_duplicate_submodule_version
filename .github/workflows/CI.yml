@@ -67,15 +67,12 @@ jobs:
         if: runner.os == 'Windows'
         uses: lukka/get-cmake@latest
 
-      - name: Install Boost prebuilt (Windows)
+      - name: Install Boost via Chocolatey (Windows)
         if: runner.os == 'Windows'
-        uses: MarkusJx/install-boost@v2.4.5
-        id: install-boost
-        with:
-          boost_version: 1.83.0
-          platform_version: 2022
-          toolset: msvc
-          arch: x86
+        shell: pwsh
+        run: |
+          choco install boost-msvc-14.3 --version=1.83.0 -y
+          echo "BOOST_ROOT=C:\local\boost_1_83_0" >> $env:GITHUB_ENV
 
       - name: Setup vcpkg (Windows)
         if: runner.os == 'Windows'
@@ -114,8 +111,6 @@ jobs:
       - name: Build and Install ur_rtde from Source (Windows)
         if: runner.os == 'Windows' && steps.cache-ur-rtde.outputs.cache-hit != 'true'
         shell: pwsh
-        env:
-          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         run: |
           git clone https://gitlab.com/sdurobotics/ur_rtde.git
           cd ur_rtde
@@ -135,34 +130,7 @@ jobs:
       - name: Configure Project (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
-        env:
-          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         run: |
           cmake -S . -B build `
             -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake" `
-            -DVCPKG_TARGET_TRIPLET=x64-windows `
-            -DCMAKE_PREFIX_PATH="C:\ur_rtde_install" `
-            -DBOOST_ROOT="$env:BOOST_ROOT"
-
-      # BUILD & RUN
-
-      - name: Build Project
-        run: cmake --build build --config Release
-
-      - name: List Build Files (Linux)
-        if: runner.os == 'Linux'
-        run: find build -type f
-
-      - name: List Build Files (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: Get-ChildItem -Recurse build
-
-      - name: Run Executable (Linux)
-        if: runner.os == 'Linux'
-        run: ./build/main
-
-      - name: Run Executable (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: .\build\Release\main.exe
+            -D
