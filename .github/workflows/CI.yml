@@ -60,7 +60,7 @@ jobs:
       - name: Configure Project (Linux)
         if: runner.os == 'Linux'
         run: cmake -S . -B build -DBUILD_PYTHON_BINDINGS=OFF
-        
+
       - name: Configure Project (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
@@ -68,8 +68,12 @@ jobs:
           cmake -S . -B build `
             -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake" `
             -DVCPKG_TARGET_TRIPLET=x64-windows `
-            -DBUILD_PYTHON_BINDINGS=OFF
-
+            -DBUILD_PYTHON_BINDINGS=OFF `
+            -DPYTHON_EXECUTABLE="" `
+            -DPython_EXECUTABLE="" `
+            -DPython3_EXECUTABLE="" `
+            -DPYBIND11_FINDPYTHON=OFF
+            
       - name: Build Project
         run: cmake --build build --config Release
 
