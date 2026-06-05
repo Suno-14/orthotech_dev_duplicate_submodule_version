@@ -4,11 +4,10 @@ project(Calculations CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Eigen — header only
 add_subdirectory(third_party/eigen)
 
-# Patch ur_rtde to find Boost from system (Linux) or vcpkg (Windows)
 set(BUILD_PYTHON_BINDINGS OFF CACHE BOOL "" FORCE)
+
 add_subdirectory(third_party/ur_rtde)
 
 include_directories(include)
