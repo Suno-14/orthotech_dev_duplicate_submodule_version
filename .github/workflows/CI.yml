@@ -65,14 +65,20 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          # Remove vcpkg's pythoninterp wrapper which interferes
+          .\vcpkg\vcpkg.exe remove pythoninterp:x64-windows --recurse
+
+          $pythonPath = (Get-Command python).Source
+          echo "Python found at: $pythonPath"
+
+          # Install setuptools to fix missing distutils in Python 3.12
+          pip install setuptools
+
           cmake -S . -B build `
             -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake" `
             -DVCPKG_TARGET_TRIPLET=x64-windows `
             -DBUILD_PYTHON_BINDINGS=OFF `
-            -DPYTHON_EXECUTABLE="" `
-            -DPython_EXECUTABLE="" `
-            -DPython3_EXECUTABLE="" `
-            -DPYBIND11_FINDPYTHON=OFF
+            -DPYTHON_EXECUTABLE="$pythonPath"
             
       - name: Build Project
         run: cmake --build build --config Release
