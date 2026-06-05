@@ -18,7 +18,7 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install Linux build tools
+      - name: Install Linux build tools and Boost
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
@@ -26,7 +26,8 @@ jobs:
             build-essential \
             g++ \
             make \
-            cmake
+            cmake \
+            libboost-all-dev
 
       - name: Setup MSVC
         if: runner.os == 'Windows'
@@ -36,8 +37,35 @@ jobs:
         if: runner.os == 'Windows'
         uses: lukka/get-cmake@latest
 
-      - name: Configure Project
+      - name: Setup vcpkg and Install Boost (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          cd vcpkg
+          .\bootstrap-vcpkg.bat -disableMetrics
+          .\vcpkg.exe install boost:x64-windows
+
+      - name: Cache vcpkg Boost (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: vcpkg/installed
+          key: vcpkg-boost-x64-windows-v1
+          restore-keys: |
+            vcpkg-boost-x64-windows-v1
+
+      - name: Configure Project (Linux)
+        if: runner.os == 'Linux'
         run: cmake -S . -B build
+
+      - name: Configure Project (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cmake -S . -B build `
+            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake" `
+            -DVCPKG_TARGET_TRIPLET=x64-windows
 
       - name: Build Project
         run: cmake --build build --config Release
