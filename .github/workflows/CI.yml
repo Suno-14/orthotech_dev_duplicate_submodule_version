@@ -13,6 +13,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Enable long paths (Windows)
+        if: runner.os == 'Windows'
+        run: git config --global core.longpaths true
+
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
@@ -52,8 +56,6 @@ jobs:
         with:
           path: vcpkg/installed
           key: vcpkg-boost-x64-windows-v1
-          restore-keys: |
-            vcpkg-boost-x64-windows-v1
 
       - name: Configure Project (Linux)
         if: runner.os == 'Linux'
