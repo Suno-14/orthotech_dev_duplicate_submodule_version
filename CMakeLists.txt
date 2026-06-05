@@ -6,14 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_subdirectory(third_party/eigen)
 
-set(BUILD_PYTHON_BINDINGS OFF CACHE BOOL "" FORCE)
-set(PYBIND11_FOUND TRUE CACHE BOOL "" FORCE)
-set(pybind11_FOUND TRUE CACHE BOOL "" FORCE)
-
-if(NOT TARGET pybind11::pybind11)
-    add_library(pybind11::pybind11 INTERFACE IMPORTED)
-endif()
-
+set(PYTHON_BINDINGS OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(third_party/ur_rtde)
 
