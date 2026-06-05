@@ -45,16 +45,15 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          git clone https://github.com/microsoft/vcpkg.git
-          cd vcpkg
-          .\bootstrap-vcpkg.bat -disableMetrics
-          .\vcpkg.exe install boost:x64-windows
+          git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
+          C:\vcpkg\bootstrap-vcpkg.bat -disableMetrics
+          C:\vcpkg\vcpkg.exe install boost:x64-windows
 
       - name: Cache vcpkg Boost (Windows)
         if: runner.os == 'Windows'
         uses: actions/cache@v4
         with:
-          path: vcpkg/installed
+          path: C:\vcpkg\installed
           key: vcpkg-boost-x64-windows-v1
 
       - name: Configure Project (Linux)
@@ -65,10 +64,10 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          .\vcpkg\vcpkg.exe remove pythoninterp:x64-windows --recurse
+          C:\vcpkg\vcpkg.exe remove pythoninterp:x64-windows --recurse
           pip install setuptools
           cmake -S . -B build `
-            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake" `
+            -DCMAKE_TOOLCHAIN_FILE="C:\vcpkg\scripts\buildsystems\vcpkg.cmake" `
             -DVCPKG_TARGET_TRIPLET=x64-windows `
             -DPYTHON_BINDINGS=OFF
             
